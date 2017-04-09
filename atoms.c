@@ -47,6 +47,7 @@ int main(int argc, char** argv) {
 	int* yC;
 	int no_of_moves;
 	int n = 0;
+	bool undo = false;
 
 	// Deal with number of players here
 	// Set number of players to as specified
@@ -382,6 +383,11 @@ int main(int argc, char** argv) {
 		{
 			pl_pos = 0;
 		}
+		if(undo == true && current_pl == player[pl_pos])
+		{
+			printf("%s's Turn\n\n", current_pl->colour);
+			undo = false;
+		}
 		if(current_pl != player[pl_pos])
 		{
 			if(pl_pos == lim)
@@ -421,12 +427,14 @@ int main(int argc, char** argv) {
 		// START command
 		if(strcmp(execute[0], "START") == 0)
 		{	
-			printf("Game already started");	
+			printf("Game already started");
+			undo = false;
 		}
 		// HELP command
 		else if(strcmp(execute[0], "HELP") == 0)
 		{
 			help();
+			undo = false;
 		}
 		// QUIT command
 		else if (strcmp(execute[0], "QUIT") == 0)
@@ -453,7 +461,7 @@ int main(int argc, char** argv) {
 				}
 				
 			}
-			
+			undo = false;
 		}
 		// PLACE command
 		else if (strcmp(execute[0], "PLACE") == 0)
@@ -468,12 +476,6 @@ int main(int argc, char** argv) {
 				fprintf(stderr, "Invalid Arguments\n");
 				continue;
 			}
-			else if( x < 0 || x > width - 1 || y < 0 || y > height - 1)
-			{
-				fprintf(stderr, "Invalid Coordinates\n");
-				continue;
-
-			}
 			else if(args > 3)
 			{
 				fprintf(stderr, "Too Many Arguments\n");
@@ -486,6 +488,11 @@ int main(int argc, char** argv) {
 				continue;
 
 			}
+			else if( x < 0 || x > width - 1 || y < 0 || y > height - 1)
+			{
+				fprintf(stderr, "Invalid Coordinates\n");
+				continue;
+			}
 
 			result = place(width, height, x, y, grid, pl_pos, lim, pl_remaining, move_no, player, current_pl, lost);
 			if(result[2] ==  0)
@@ -496,6 +503,7 @@ int main(int argc, char** argv) {
 			pl_pos = result[0];
 			move_no = result[1];
 			free(result);
+			undo = false;
 		
 		}
 		// DISPLAY command
@@ -539,14 +547,17 @@ int main(int argc, char** argv) {
 					printf("-");
 			}
 			printf("\n\n");
+			undo = false;
 
 		}
 		// UNDO command
 		else if(strcmp(execute[0], "UNDO") == 0)
 		{
+			undo = true;
 			if(move_no < 2)
 			{
 				printf("Cannot Undo\n");
+				undo = false;
 				continue;
 			}
 			for(int i = 0; i < height; i++)
@@ -701,16 +712,19 @@ int main(int argc, char** argv) {
 			
 			}
 			printf("Game Saved\n\n");
+			undo = false;
 			continue;
 		}
 		else if(strcmp(execute[0], "LOAD") == 0)
 		{
 			printf("Restart Application To Load Save\n");
+			undo = false;
 		}
 
 		else
 		{
 			printf("Invalid Command\n");
+			undo = false;
 		}
 	}
 
